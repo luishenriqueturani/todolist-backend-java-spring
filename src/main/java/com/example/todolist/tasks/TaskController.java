@@ -47,15 +47,16 @@ public class TaskController {
 
   @PutMapping("/{id}")
   public ResponseEntity update(@RequestBody Task newTask, HttpServletRequest request, @PathVariable UUID id){
-    newTask.setId(id);
     UUID userId = (UUID) request.getAttribute("userId");
-
-    newTask.setUserId(userId);
 
     Task task = this.taskRepository.findById(id).orElse(null);
 
     if(task == null){
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Task não encontrada");
+    }
+
+    if(!task.getUserId().equals( userId )){
+      return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Não é possível alterar algo criado por outro usuário");
     }
 
     Utils.copyNonNullProperties(newTask, task);
